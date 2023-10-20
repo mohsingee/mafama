@@ -1,0 +1,2646 @@
+@extends('layouts.main')
+@section('content')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+    <script src="{{ asset('public/morris/morris.min.js') }}" type="text/javascript"></script>
+    <style type="text/css">
+        text {
+            display: none !important;
+        }
+
+        .table-scrollable {
+            overflow-x: auto;
+        }
+
+        .morris-hover-point {
+            display: none;
+        }
+
+        table a {
+            color: #da291c;
+        }
+
+        .hmd-year-filter {
+            margin-right: 12px;
+            background-color: #da291c;
+            border-color: #da291c;
+            color: #fff;
+            padding: 1%;
+            border-radius: 5%
+        }
+
+        .active1 {
+            background-color: purple;
+            border-color: purple;
+        }
+    </style>
+    <section>
+        <div class="container">
+            <div class="row">
+                <!-- tabs content -->
+                <div class="col-md-12 col-sm-12">
+                    <div class="heading-title heading-dotted col-md-12 margin-bottom-10 text-center">
+                        <h4>Financial Management / Reports</h4>
+                    </div>
+                    <div class="col-md-12 text-right margin-bottom-20">
+                        <a href="#" class="btn btn-md btn-info margin-right-10">View Offers</a>
+                        <a href="#" class="btn btn-md btn-info margin-right-10">My Faith</a>
+                        <a href="{{ url('birthplace') }}" class="btn btn-md btn-info margin-right-10">My Birth Place</a>
+                        <a href="#" class="btn btn-md btn-info margin-right-10">Sharing</a>
+                        <a href="#" class="btn btn-md btn-info margin-right-10">My City Guide</a>
+                        <?php if($chat != "off"){ ?>
+                        <a href="{{ url('chat') }}" class="btn btn-md btn-info margin-right-10">Chat</a>
+                        <?php } ?>
+                        <?php if($tools != "off"){ ?>
+                        <a href="{{ url('tools') }}" class="btn btn-md btn-info margin-right-10">Tools</a>
+                        <?php } ?>
+                        <a href="{{ url('calender_meeting') }}" class="btn btn-md btn-info margin-right-10">My Daily
+                            Briefing</a>
+                        <a href="{{ url()->previous() }}" class="btn btn-md btn-info">Back</a>
+                    </div>
+                    <ul class="nav nav-tabs nav-button-tabs nav-justified margin-bottom-20">
+                        <li class="active"><a href="{{ url('profit_loss_stmt') }}">Profit / Loss Statement</a></li>
+                        <li><a href="{{ url('revenue_report') }}">Revenue Report</a></li>
+                        <li><a href="{{ url('expenses_report') }}">Expense Report</a></li>
+                        <li><a href="{{ url('balancesheet_report') }}">Balance Sheet</a></li>
+                        <li><a href="{{ url('paymentbalance_report') }}">Clients With Balance</a></li>
+                    </ul>
+                    <div class="tab-content margin-top-10"
+                        style="border: 1px solid #da291c !important; border-radius: 10px; padding: 10px;">
+                        <div class="col-md-12">
+                            <ul class="nav nav-tabs nav-button-tabs nav-justified">
+                                <li><a href="#weekly" data-toggle="tab">Weekly</a></li>
+                                <li class="active"><a href="#monthly" data-toggle="tab">Monthly</a></li>
+                                <li><a href="#quarterly" data-toggle="tab">Quarterly</a></li>
+                                <!-- <li><a href="#sms-tab" data-toggle="tab">Send SMS</a></li> -->
+                            </ul>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="tab-content margin-top-10"
+                                style="border: 1px solid #da291c !important; border-radius: 10px; padding: 20px;">
+                                <div class="tab-pane fade in " id="weekly">
+                                    <div class="">
+                                        <div class="row" style="margin: 10px 0;">
+                                            <div class="col-md-2">
+                                                <label style="margin: 0px 0;">Choose a base year</label>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <?php foreach($years as $value){ ?>
+                                                <a href="javascript:void(0)" data-id="<?php echo $value; ?>"
+                                                    id="weeklyyearlist"><span class="act"
+                                                        style="margin-right: 12px;background-color: #da291c;
+                                    border-color: #da291c; color: #fff; padding: 1%; border-radius: 5%">{{ $value }}</span></a>
+                                                <?php } ?>
+                                            </div>
+                                        </div>
+                                        <div class="table-scroll" id="weeklydata"></div>
+                                        <div id="" class="table-scroll fw1">
+                                            <div class="table-wrap">
+                                                <table class="table table-striped table-bordered table-hover main-table"
+                                                    id="">
+                                                    <thead>
+                                                        <?php if($weekcnt == 3){ ?>
+                                                        <tr class="top-tr">
+                                                            <th class="fixed-side"></th>
+                                                            <th>1st Week</th>
+                                                            <th>2nd Week</th>
+                                                            <th>3rd Week</th>
+                                                            <th>Total</th>
+                                                        </tr>
+                                                        <?php }elseif ($weekcnt == 4) { ?>
+                                                        <tr class="top-tr">
+                                                            <th class="fixed-side"></th>
+                                                            <th>1st Week</th>
+                                                            <th>2nd Week</th>
+                                                            <th>3rd Week</th>
+                                                            <th>4th Week</th>
+                                                            <th>Total</th>
+                                                        </tr>
+                                                        <?php }elseif ($weekcnt == 5) { ?>
+                                                        <tr class="top-tr">
+                                                            <th class="fixed-side"></th>
+                                                            <th>1st Week</th>
+                                                            <th>2nd Week</th>
+                                                            <th>3rd Week</th>
+                                                            <th>4th Week</th>
+                                                            <th>5th Week</th>
+                                                            <th>Total</th>
+                                                        </tr>
+                                                        <?php }elseif ($weekcnt == 6) { ?>
+                                                        <tr class="top-tr">
+                                                            <th class="fixed-side"></th>
+                                                            <th>1st Week</th>
+                                                            <th>2nd Week</th>
+                                                            <th>3rd Week</th>
+                                                            <th>4th Week</th>
+                                                            <th>5th Week</th>
+                                                            <th>6th Week</th>
+                                                            <th>Total</th>
+                                                        </tr>
+                                                        <?php } ?>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <?php if($weekcnt == 3){ ?>
+                                                            <td class="fixed-side"
+                                                                style="text-align: left; color: #da291c;"><b>Revenue</b>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <?php }elseif ($weekcnt == 4) { ?>
+                                                            <td class="fixed-side"
+                                                                style="text-align: left; color: #da291c;"><b>Revenue</b>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <?php }elseif ($weekcnt == 5) { ?>
+                                                            <td class="fixed-side"
+                                                                style="text-align: left; color: #da291c;"><b>Revenue</b>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <?php }elseif ($weekcnt == 6) { ?>
+                                                            <td class="fixed-side"
+                                                                style="text-align: left; color: #da291c;"><b>Revenue</b>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <?php } ?>
+                                                        </tr>
+                                                        <tr class="odd gradeX">
+                                                            <td class="fixed-side">Gross Revenue</td>
+                                                            <?php if($weekcnt == 3){ ?>
+                                                            <td class="grossweek" id="gweek0"><?= $week1 ?></td>
+                                                            <td class="grossweek" id="gweek1"><?= $week2 ?></td>
+                                                            <td class="grossweek" id="gweek2"><?= $week3 ?></td>
+                                                            <td>{{ $week1 + $week2 + $week3 }}</td>
+                                                            <?php }elseif ($weekcnt == 4) { ?>
+                                                            <td class="grossweek" id="gweek0"><?= $week1 ?></td>
+                                                            <td class="grossweek" id="gweek1"><?= $week2 ?></td>
+                                                            <td class="grossweek" id="gweek2"><?= $week3 ?></td>
+                                                            <td class="grossweek" id="gweek3"><?= $week4 ?></td>
+                                                            <td>{{ $week1 + $week2 + $week3 + $week4 }}</td>
+                                                            <?php }elseif ($weekcnt == 5) { ?>
+                                                            <td class="grossweek" id="gweek0"><?= $week1 ?></td>
+                                                            <td class="grossweek" id="gweek1"><?= $week2 ?></td>
+                                                            <td class="grossweek" id="gweek2"><?= $week3 ?></td>
+                                                            <td class="grossweek" id="gweek3"><?= $week4 ?></td>
+                                                            <td class="grossweek" id="gweek4"><?= $week5 ?></td>
+                                                            <td>{{ $week1 + $week2 + $week3 + $week4 + $week5 }}</td>
+                                                            <?php }elseif ($weekcnt == 6) { ?>
+                                                            <td class="grossweek" id="gweek0"><?= $week1 ?></td>
+                                                            <td class="grossweek" id="gweek1"><?= $week2 ?></td>
+                                                            <td class="grossweek" id="gweek2"><?= $week3 ?></td>
+                                                            <td class="grossweek" id="gweek3"><?= $week4 ?></td>
+                                                            <td class="grossweek" id="gweek4"><?= $week5 ?></td>
+                                                            <!--  <td class="grossweek" id="gweek5">\</td> -->
+                                                            <td>{{ $week1 + $week2 + $week3 + $week4 + $week5 }}</td>
+                                                            <?php } ?>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                        <tr class="odd gradeX">
+                                                            <td class="fixed-side">Other Revenue</td>
+                                                            <?php if($weekcnt == 3){ ?>
+                                                            <td class="otherrweek" id="oweek0"><?= $week1s ?></td>
+                                                            <td class="otherrweek" id="oweek1"><?= $week2s ?></td>
+                                                            <td class="otherrweek" id="oweek2"><?= $week3s ?></td>
+                                                            <td>{{ $week1s + $week2s + $week3s }}</td>
+                                                            <?php }elseif ($weekcnt == 4) { ?>
+                                                            <td class="otherrweek" id="owee0"><?= $week1s ?></td>
+                                                            <td class="otherrweek" id="oweek1"><?= $week2s ?></td>
+                                                            <td class="otherrweek" id="oweek2"><?= $week3s ?></td>
+                                                            <td class="otherrweek" id="oweek3"><?= $week4s ?></td>
+                                                            <td>{{ $week1s + $week2s + $week3s + $week4s }}</td>
+                                                            <?php }elseif ($weekcnt == 5) { ?>
+                                                            <td class="otherrweek" id="oweek0"><?= $week1s ?></td>
+                                                            <td class="otherrweek" id="oweek1"><?= $week2s ?></td>
+                                                            <td class="otherrweek" id="oweek2"><?= $week3s ?></td>
+                                                            <td class="otherrweek" id="oweek3"><?= $week4s ?></td>
+                                                            <td class="otherrweek" id="oweek4"><?= $week5s ?></td>
+                                                            <td>{{ $week1s + $week2s + $week3s + $week4s + $week5s }}</td>
+                                                            <?php }elseif ($weekcnt == 6) { ?>
+                                                            <td class="otherrweek" id="oweek0"><?= $week1s ?></td>
+                                                            <td class="otherrweek" id="oweek1"><?= $week2s ?></td>
+                                                            <td class="otherrweek" id="oweek2"><?= $week3s ?></td>
+                                                            <td class="otherrweek" id="oweek3"><?= $week4s ?></td>
+                                                            <td class="otherrweek" id="oweek4"><?= $week5s ?></td>
+                                                            <!--  <td class="otherrweek" id="oweek5"></td> -->
+                                                            <td>{{ $week1s + $week2s + $week3s + $week4s + $week5s }}</td>
+                                                            <?php } ?>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                        <tr class="total-tr">
+                                                            <td class="fixed-side" style=""><b>Total Revenue</b>
+                                                            </td>
+                                                            <?php if($weekcnt == 3){ ?>
+                                                            <td><?= $week1 + $week1s ?></td>
+                                                            <td><?= $week2 + $week2s ?></td>
+                                                            <td><?= $week3 + $week3s ?></td>
+                                                            <td>{{ $week1 + $week2 + $week3 + $week1s + $week2s + $week3s }}</td>
+                                                            <?php }elseif ($weekcnt == 4) { ?>
+                                                            <td><?= $week1 + $week1s ?></td>
+                                                            <td><?= $week2 + $week2s ?></td>
+                                                            <td><?= $week3 + $week3s ?></td>
+                                                            <td><?= $week4 + $week4s ?></td>
+                                                            <td>{{ $week1 + $week2 + $week3 + $week4 + $week1s + $week2s + $week3s + $week4s }}
+                                                            </td>
+                                                            <?php }elseif ($weekcnt == 5) { ?>
+                                                            <td><?= $week1 + $week1s ?></td>
+                                                            <td><?= $week2 + $week2s ?></td>
+                                                            <td><?= $week3 + $week3s ?></td>
+                                                            <td><?= $week4 + $week4s ?></td>
+                                                            <td><?= $week5 + $week5s ?></td>
+                                                            <td>{{ $week1 + $week2 + $week3 + $week4 + $week5 + $week1s + $week2s + $week3s + $week4s + $week5s }}
+                                                            </td>
+                                                            <?php }elseif ($weekcnt == 6) { ?>
+                                                            <td><?= $week1 + $week1s ?></td>
+                                                            <td><?= $week2 + $week2s ?></td>
+                                                            <td><?= $week3 + $week3s ?></td>
+                                                            <td><?= $week4 + $week4s ?></td>
+                                                            <td><?= $week5 + $week5s ?></td>
+                                                            <td>{{ $week1 + $week2 + $week3 + $week4 + $week5 + $week1s + $week2s + $week3s + $week4s + $week5s }}
+                                                            </td>
+                                                            <?php } ?>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                        <tr>
+                                                            <?php if($weekcnt == 3){ ?>
+                                                            <td class="fixed-side"
+                                                                style="text-align: left; color: #da291c;"><b>Expenses</b>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <?php }elseif ($weekcnt == 4) { ?>
+                                                            <td class="fixed-side"
+                                                                style="text-align: left; color: #da291c;"><b>Expenses</b>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <?php }elseif ($weekcnt == 5) { ?>
+                                                            <td class="fixed-side"
+                                                                style="text-align: left; color: #da291c;"><b>Expenses</b>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <?php }elseif ($weekcnt == 6) { ?>
+                                                            <td class="fixed-side"
+                                                                style="text-align: left; color: #da291c;"><b>Expenses</b>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <?php } ?>
+                                                        </tr>
+                                                        <?php 
+                                          foreach($expensess as $value){
+                                          ?>
+                                                        <tr class="odd gradeX">
+                                                            <td class="fixed-side"><?= $value->name ?></td>
+                                                            <?php
+                                                            echo $actual_week = App\Http\Controllers\MainController::getweekactualexp($value->name);
+                                                            ?>
+                                                        </tr>
+                                                        <?php } ?>
+                                                        <tr class="total2-tr">
+                                                            <td class="fixed-side" style=""><b>Total Expenses</b>
+                                                            </td>
+                                                            <?php
+                                                            echo $actual_week_total = App\Http\Controllers\MainController::getweekactualexptotal();
+                                                            ?>
+                                                        </tr>
+                                                    </tbody>
+                                                    <tbody></tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td class="fixed-side" style="text-align: left;"><b>Estimated
+                                                                    Profit & Loss</b></td>
+                                                            <?php
+                                                            echo $actual_week_diff = App\Http\Controllers\MainController::getweekactualexpdiff();
+                                                            ?>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12" style="margin-top: 10px;">
+                                            <div id="monthly_details3"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade in active" id="monthly">
+                                    <div class="">
+                                        <div class="row" style="margin: 10px 0;">
+                                            <div class="col-md-2">
+                                                <label style="margin: 0px 0;">Choose a base year</label>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <?php foreach($years as $value){ ?>
+                                                <a href="{{ url('/profit_loss_stmt?year=' . $value) }}"
+                                                    data-id="<?php echo $value; ?>" id="monthlyyearlist"><span
+                                                        class="act hmd-year-filter {{ Request::get('year') == $value ? 'active1' : '' }} "
+                                                        style="">{{ $value }}</span></a>
+                                                <?php } ?>
+                                            </div>
+                                        </div>
+
+                                        <div id="" class="table-scroll">
+                                            <div class="table-scroll" id="monthlydata"></div>
+                                            <div class="table-wrap fw2">
+                                                <?php
+                                                $tott2 = $jantotal2actual + $febtotal2actual + $martotal2actual + $aprtotal2actual + $maytotal2actual + $juntotal2actual + $jultotal2actual + $augtotal2actual + $septotal2actual + $octtotal2actual + $novtotal2actual + $dectotal2actual; ?>
+                                                <table class="table table-striped table-bordered table-hover main-table"
+                                                    id="">
+                                                    <thead>
+                                                        <tr class="bg-purple">
+                                                            <td class="fixed-side" style="text-align: left;"><b>Estimated
+                                                                    Profit & Loss</b></td>
+                                                            <td><?= $jantotalactual - $jantotal2actual ?></td>
+                                                            <td><?= $febtotalactual - $febtotal2actual ?></td>
+                                                            <td><?= $martotalactual - $martotal2actual ?></td>
+                                                            <td><?= $aprtotalactual - $aprtotal2actual ?></td>
+                                                            <td><?= $maytotalactual - $maytotal2actual ?></td>
+                                                            <td><?= $juntotalactual - $juntotal2actual ?></td>
+                                                            <td><?= $jultotalactual - $jultotal2actual ?></td>
+                                                            <td><?= $augtotalactual - $augtotal2actual ?></td>
+                                                            <td><?= $septotalactual - $septotal2actual ?></td>
+                                                            <td><?= $octtotalactual - $octtotal2actual ?></td>
+                                                            <td><?= $novtotalactual - $novtotal2actual ?></td>
+                                                            <td><?= $dectotalactual - $dectotal2actual ?></td>
+                                                            <td><?= $monthtotalactual - $tott2 ?></td>
+                                                            <td>
+                                                                <!-- <a href="#"><i class="fa fa-bar-chart"></i></a> -->
+                                                            </td>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                    </thead>
+                                                    <thead>
+                                                        <tr class="top-tr">
+                                                            <th class="fixed-side"></th>
+                                                            <th>Jan</th>
+                                                            <th>Feb</th>
+                                                            <th>Mar</th>
+                                                            <th>Apr</th>
+                                                            <th>May</th>
+                                                            <th>Jun</th>
+                                                            <th>Jul</th>
+                                                            <th>Aug</th>
+                                                            <th>Sep</th>
+                                                            <th>Oct</th>
+                                                            <th>Nov</th>
+                                                            <th>Dec</th>
+                                                            <th>Total</th>
+                                                            <th>Graph</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="fixed-side"
+                                                                style="text-align: left; color: #da291c;"><b>Revenue</b>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                        </tr>
+                                                        <tr class="odd gradeX">
+                                                            <td class="fixed-side">Gross Revenue</td>
+                                                            <?php if($jangrossactual != 0){ ?>
+                                                            <td><a class="actual_month_revenue"
+                                                                    id="01revactual"><?= $jangrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $jangrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($febgrossactual != 0){ ?>
+                                                            <td><a class="actual_month_revenue"
+                                                                    id="02revactual"><?= $febgrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $febgrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($margrossactual != 0){ ?>
+                                                            <td><a class="actual_month_revenue"
+                                                                    id="03revactual"><?= $margrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $margrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($aprgrossactual != 0){ ?>
+                                                            <td><a class="actual_month_revenue"
+                                                                    id="04revactual"><?= $aprgrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $aprgrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($maygrossactual != 0){ ?>
+                                                            <td><a class="actual_month_revenue"
+                                                                    id="05revactual"><?= $maygrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $maygrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($jungrossactual != 0){ ?>
+                                                            <td><a class="actual_month_revenue"
+                                                                    id="06revactual"><?= $jungrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $jungrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($julgrossactual != 0){ ?>
+                                                            <td><a class="actual_month_revenue"
+                                                                    id="07revactual"><?= $julgrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $julgrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($auggrossactual != 0){ ?>
+                                                            <td><a class="actual_month_revenue"
+                                                                    id="08revactual"><?= $auggrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $auggrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($sepgrossactual != 0){ ?>
+                                                            <td><a class="actual_month_revenue"
+                                                                    id="09revactual"><?= $sepgrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $sepgrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($octgrossactual != 0){ ?>
+                                                            <td><a class="actual_month_revenue"
+                                                                    id="10revactual"><?= $octgrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $octgrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($novgrossactual != 0){ ?>
+                                                            <td><a class="actual_month_revenue"
+                                                                    id="11revactual"><?= $novgrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $novgrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($decgrossactual != 0){ ?>
+                                                            <td><a class="actual_month_revenue"
+                                                                    id="12revactual"><?= $decgrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $decgrossactual ?></td>
+                                                            <?php } ?>
+                                                            <td><?= $monthgrossactual ?></td>
+                                                            <td>
+                                                                <a href="{{ url('gross_revenue_chart') }}"><i
+                                                                        class="fa fa-bar-chart"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                        <tr class="odd gradeX">
+                                                            <td class="fixed-side">Other Revenue</td>
+                                                            <?php if($janotherrevenue != 0){ ?>
+                                                            <td><a class="actual_other_revenue"
+                                                                    id="01otheractual"><?= $janotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $janotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($febotherrevenue != 0){ ?>
+                                                            <td><a class="actual_other_revenue"
+                                                                    id="02otheractual"><?= $febotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $febotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($marotherrevenue != 0){ ?>
+                                                            <td><a class="actual_other_revenue"
+                                                                    id="03otheractual"><?= $marotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $marotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($aprotherrevenue != 0){ ?>
+                                                            <td><a class="actual_other_revenue"
+                                                                    id="04otheractual"><?= $aprotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $aprotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($mayotherrevenue != 0){ ?>
+                                                            <td><a class="actual_other_revenue"
+                                                                    id="05otheractual"><?= $mayotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $mayotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($junotherrevenue != 0){ ?>
+                                                            <td><a class="actual_other_revenue"
+                                                                    id="06otheractual"><?= $junotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $junotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($julotherrevenue != 0){ ?>
+                                                            <td><a class="actual_other_revenue"
+                                                                    id="07otheractual"><?= $julotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $julotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($augotherrevenue != 0){ ?>
+                                                            <td><a class="actual_other_revenue"
+                                                                    id="08otheractual"><?= $augotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $augotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($sepotherrevenue != 0){ ?>
+                                                            <td><a class="actual_other_revenue"
+                                                                    id="09otheractual"><?= $sepotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $sepotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($octotherrevenue != 0){ ?>
+                                                            <td><a class="actual_other_revenue"
+                                                                    id="10otheractual"><?= $octotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $octotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($novotherrevenue != 0){ ?>
+                                                            <td><a class="actual_other_revenue"
+                                                                    id="11otheractual"><?= $novotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $novotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($decotherrevenue != 0){ ?>
+                                                            <td><a class="actual_other_revenue"
+                                                                    id="12otheractual"><?= $decotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $decotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <td><?= $monthotherrevenue ?></td>
+                                                            <td>
+                                                                <a href="{{ url('other_revenue_chart') }}"><i
+                                                                        class="fa fa-bar-chart"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                        <tr class="total-tr">
+                                                            <td class="fixed-side" style=""><b>Total Revenue</b>
+                                                            </td>
+                                                            <td><?= $jantotalactual ?></td>
+                                                            <td><?= $febtotalactual ?></td>
+                                                            <td><?= $martotalactual ?></td>
+                                                            <td><?= $aprtotalactual ?></td>
+                                                            <td><?= $maytotalactual ?></td>
+                                                            <td><?= $juntotalactual ?></td>
+                                                            <td><?= $jultotalactual ?></td>
+                                                            <td><?= $augtotalactual ?></td>
+                                                            <td><?= $septotalactual ?></td>
+                                                            <td><?= $octtotalactual ?></td>
+                                                            <td><?= $novtotalactual ?></td>
+                                                            <td><?= $dectotalactual ?></td>
+                                                            <td><?= $monthtotalactual ?></td>
+                                                            <td>
+                                                                <a href="{{ url('all_revenue_chart') }}"><i
+                                                                        class="fa fa-bar-chart"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                        <tr>
+                                                            <td class="fixed-side"
+                                                                style="text-align: left; color: #da291c;"><b>Expenses</b>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                        </tr>
+                                                        <?php
+                                          $months_arr = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+                                          foreach($expense_account as $value){
+                                          ?>
+                                                        <tr class="odd gradeX">
+                                                            <td class="fixed-side"><?= $value->account_description ?></td>
+                                                            <?php
+                                                            $tot = 0;
+                                                            foreach ($months_arr as $valuee) {
+                                                                $count = \App\Http\Controllers\MainController::get_month_count_expense($valuee, $value->account_description);
+                                                            
+                                                                $tot += $count;
+                                                            
+                                                                // echo '<td>'.$count.'</td>';
+                                                            
+                                                                if ($count > 0) {
+                                                                    echo '<td><a class="revenue_month" id="' . $valuee . 'revenue_month' . $value->account_description . '">' . $count . '</a></td>';
+                                                                } else {
+                                                                    echo '<td>' . $count . '</td>';
+                                                                }
+                                                            }
+                                                            ?>
+                                                            <td><?= $tot ?></td>
+                                                            <td>
+                                                                <a
+                                                                    href="{{ url('expense_variance_monthly_graph') }}/<?= $value->account_description ?>"><i
+                                                                        class="fa fa-bar-chart"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                        <?php
+                                          }
+                                          ?>
+                                                        <?php 
+                                          foreach($expense as $value){
+                                          ?>
+                                                        <tr class="odd gradeX">
+                                                            <td class="fixed-side"><?= $value->name ?></td>
+                                                            <?php
+                                             $actual_jan = App\Http\Controllers\HomeController::getjanactualexp($value->name);
+                                             if($actual_jan!= 0){ ?>
+                                                            <td><a class="actual_monthly_expense"
+                                                                    id="01actualexpense<?= $value->name ?>"><?= $actual_jan ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_jan ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_feb = App\Http\Controllers\HomeController::getfebactualexp($value->name);
+                                             if($actual_feb != 0){ ?>
+                                                            <td><a class="actual_monthly_expense"
+                                                                    id="02actualexpense<?= $value->name ?>"><?= $actual_feb ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_feb ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_mar = App\Http\Controllers\HomeController::getmaractualexp($value->name);
+                                             if($actual_mar != 0){ ?>
+                                                            <td><a class="actual_monthly_expense"
+                                                                    id="03actualexpense<?= $value->name ?>"><?= $actual_mar ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_mar ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_apr = App\Http\Controllers\HomeController::getapractualexp($value->name);
+                                             if($actual_apr != 0){ ?>
+                                                            <td><a class="actual_monthly_expense"
+                                                                    id="04actualexpense<?= $value->name ?>"><?= $actual_apr ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_apr ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_may = App\Http\Controllers\HomeController::getmayactualexp($value->name);
+                                             if($actual_may != 0){ ?>
+                                                            <td><a class="actual_monthly_expense"
+                                                                    id="05actualexpense<?= $value->name ?>"><?= $actual_may ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_may ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_jun = App\Http\Controllers\HomeController::getjunactualexp($value->name);
+                                             if($actual_jun != 0){ ?>
+                                                            <td><a class="actual_monthly_expense"
+                                                                    id="06actualexpense<?= $value->name ?>"><?= $actual_jun ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_jun ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_jul = App\Http\Controllers\HomeController::getjulactualexp($value->name);
+                                             if($actual_jul != 0){ ?>
+                                                            <td><a class="actual_monthly_expense"
+                                                                    id="07actualexpense<?= $value->name ?>"><?= $actual_jul ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_jul ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_aug = App\Http\Controllers\HomeController::getaugactualexp($value->name);
+                                             if($actual_aug != 0){ ?>
+                                                            <td><a class="actual_monthly_expense"
+                                                                    id="08actualexpense<?= $value->name ?>"><?= $actual_aug ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_aug ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_sep = App\Http\Controllers\HomeController::getsepactualexp($value->name);
+                                             if($actual_sep != 0){ ?>
+                                                            <td><a class="actual_monthly_expense"
+                                                                    id="09actualexpense<?= $value->name ?>"><?= $actual_sep ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_sep ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_oct = App\Http\Controllers\HomeController::getoctactualexp($value->name);
+                                             if($actual_oct != 0){ ?>
+                                                            <td><a class="actual_monthly_expense"
+                                                                    id="10actualexpense<?= $value->name ?>"><?= $actual_oct ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_oct ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_nov = App\Http\Controllers\HomeController::getnovactualexp($value->name);
+                                             if($actual_nov != 0){ ?>
+                                                            <td><a class="actual_monthly_expense"
+                                                                    id="11actualexpense<?= $value->name ?>"><?= $actual_nov ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_nov ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_decem = App\Http\Controllers\HomeController::getdecemactualexp($value->name);
+                                             if($actual_decem != 0){ ?>
+                                                            <td><a class="actual_monthly_expense"
+                                                                    id="12actualexpense<?= $value->name ?>"><?= $actual_decem ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_decem ?></td>
+                                                            <?php } ?>
+                                                            <td><?php echo $actual_total2 = App\Http\Controllers\HomeController::gettotalactualexp($value->name); ?></td>
+                                                            <td>
+                                                                <a
+                                                                    href="{{ url('expense_variance_monthly_graph') }}/<?= $value->name ?>"><i
+                                                                        class="fa fa-bar-chart"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                        <?php } ?>
+                                                        <tr class="total2-tr">
+                                                            <td class="fixed-side" style=""><b>Total Expenses</b>
+                                                            </td>
+                                                            <td><?= $jantotal2actual ?></td>
+                                                            <td><?= $febtotal2actual ?></td>
+                                                            <td><?= $martotal2actual ?></td>
+                                                            <td><?= $aprtotal2actual ?></td>
+                                                            <td><?= $maytotal2actual ?></td>
+                                                            <td><?= $juntotal2actual ?></td>
+                                                            <td><?= $jultotal2actual ?></td>
+                                                            <td><?= $augtotal2actual ?></td>
+                                                            <td><?= $septotal2actual ?></td>
+                                                            <td><?= $octtotal2actual ?></td>
+                                                            <td><?= $novtotal2actual ?></td>
+                                                            <td><?= $dectotal2actual ?></td>
+                                                            <td><?= $tott2 = $jantotal2actual + $febtotal2actual + $martotal2actual + $aprtotal2actual + $maytotal2actual + $juntotal2actual + $jultotal2actual + $augtotal2actual + $septotal2actual + $octtotal2actual + $novtotal2actual + $dectotal2actual ?>
+                                                            </td>
+                                                            <td>
+                                                                <a href="{{ url('expense_monthly_vary_chart') }}"><i
+                                                                        class="fa fa-bar-chart"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td class="fixed-side" style="text-align: left;"><b>Estimated
+                                                                    Profit & Loss</b></td>
+                                                            <td><?= $jantotalactual - $jantotal2actual ?></td>
+                                                            <td><?= $febtotalactual - $febtotal2actual ?></td>
+                                                            <td><?= $martotalactual - $martotal2actual ?></td>
+                                                            <td><?= $aprtotalactual - $aprtotal2actual ?></td>
+                                                            <td><?= $maytotalactual - $maytotal2actual ?></td>
+                                                            <td><?= $juntotalactual - $juntotal2actual ?></td>
+                                                            <td><?= $jultotalactual - $jultotal2actual ?></td>
+                                                            <td><?= $augtotalactual - $augtotal2actual ?></td>
+                                                            <td><?= $septotalactual - $septotal2actual ?></td>
+                                                            <td><?= $octtotalactual - $octtotal2actual ?></td>
+                                                            <td><?= $novtotalactual - $novtotal2actual ?></td>
+                                                            <td><?= $dectotalactual - $dectotal2actual ?></td>
+                                                            <td><?= $monthtotalactual - $tott2 ?></td>
+                                                            <td>
+                                                                <!-- <a href="#"><i class="fa fa-bar-chart"></i></a> -->
+                                                            </td>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12" style="margin-top: 10px;">
+                                            <div id="monthly_details"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade in" id="quarterly">
+                                    <div class="">
+                                        <div class="row" style="margin: 10px 0;">
+                                            <div class="col-md-2">
+                                                <label style="margin: 0px 0;">Choose a base year</label>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <?php foreach($years as $value){ ?>
+                                                <a href="javascript:void(0)" data-id="<?php echo $value; ?>"
+                                                    id="quaterlyyearlist"><span class="act"
+                                                        style="margin-right: 12px;background-color: #da291c;
+                                    border-color: #da291c; color: #fff; padding: 1%; border-radius: 5%">{{ $value }}</span></a>
+                                                <?php } ?>
+                                            </div>
+                                        </div>
+                                        <div class="table-scroll" id="quaterlydata"></div>
+                                        <div id="" class="table-scroll fw3">
+                                            <div class="table-wrap">
+                                                <table class="table table-striped table-bordered table-hover main-table"
+                                                    id="">
+                                                    <thead>
+                                                        <tr class="top-tr">
+                                                            <th class="fixed-side"></th>
+                                                            <th>Jan-Mar</th>
+                                                            <th>Apr-Jun</th>
+                                                            <th>Jul-Sep</th>
+                                                            <th>Oct-Dec</th>
+                                                            <th>Total</th>
+                                                            <th>Graph</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="fixed-side"
+                                                                style="text-align: left; color: #da291c;"><b>Revenue</b>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                        </tr>
+                                                        <tr class="odd gradeX">
+                                                            <td class="fixed-side">Gross Revenue</td>
+                                                            <?php if($janmargrossactual != 0){ ?>
+                                                            <td><a class="actual_quarter_revenue"
+                                                                    id="01qrevactual"><?= $janmargrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $janmargrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($aprjungrossactual != 0){ ?>
+                                                            <td><a class="actual_quarter_revenue"
+                                                                    id="04qrevactual"><?= $aprjungrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $aprjungrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($julsepgrossactual != 0){ ?>
+                                                            <td><a class="actual_quarter_revenue"
+                                                                    id="07qrevactual"><?= $julsepgrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $julsepgrossactual ?></td>
+                                                            <?php } ?>
+                                                            <?php if($octdecgrossactual != 0){ ?>
+                                                            <td><a class="actual_quarter_revenue"
+                                                                    id="10qrevactual"><?= $octdecgrossactual ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $octdecgrossactual ?></td>
+                                                            <?php } ?>
+                                                            <td><?= $monthgrossactual ?></td>
+                                                            <td>
+                                                                <a href="{{ url('gross_quarter_revenue_chart') }}"><i
+                                                                        class="fa fa-bar-chart"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                        <tr class="odd gradeX">
+                                                            <td class="fixed-side">Other Revenue</td>
+                                                            <?php if($janmarotherrevenue != 0){ ?>
+                                                            <td><a class="quarteractual_other_revenue"
+                                                                    id="01qotheractual"><?= $janmarotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $janmarotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($aprjunotherrevenue != 0){ ?>
+                                                            <td><a class="quarteractual_other_revenue"
+                                                                    id="04qotheractual"><?= $aprjunotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $aprjunotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($julsepotherrevenue != 0){ ?>
+                                                            <td><a class="quarteractual_other_revenue"
+                                                                    id="07qotheractual"><?= $julsepotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $julsepotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <?php if($octdecotherrevenue != 0){ ?>
+                                                            <td><a class="quarteractual_other_revenue"
+                                                                    id="10qotheractual"><?= $octdecotherrevenue ?></a></td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $octdecotherrevenue ?></td>
+                                                            <?php } ?>
+                                                            <td><?= $monthotherrevenue ?></td>
+                                                            <td>
+                                                                <a href="{{ url('other_quarter_revenue_chart') }}"><i
+                                                                        class="fa fa-bar-chart"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                        <tr class="total-tr">
+                                                            <td class="fixed-side" style=""><b>Total Revenue</b>
+                                                            </td>
+                                                            <td><?= $janmartotalactual ?></td>
+                                                            <td><?= $aprjuntotalactual ?></td>
+                                                            <td><?= $julseptotalactual ?></td>
+                                                            <td><?= $octdectotalactual ?></td>
+                                                            <td><?= $monthtotalactual ?></td>
+                                                            <td>
+                                                                <a href="{{ url('all_quarter_revenue_chart') }}"><i
+                                                                        class="fa fa-bar-chart"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                        <tr>
+                                                            <td class="fixed-side"
+                                                                style="text-align: left; color: #da291c;"><b>Expenses</b>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                        </tr>
+                                                        <?php 
+                                          foreach($expensess as $value){
+                                          ?>
+                                                        <tr class="odd gradeX">
+                                                            <td class="fixed-side"><?= $value->name ?></td>
+                                                            <?php
+                                             $actual_janmar = App\Http\Controllers\HomeController::getjanmaractualexp($value->name);
+                                             if($actual_janmar!= 0){ ?>
+                                                            <td><a class="actual_quarterly_expense"
+                                                                    id="01qactualexpense<?= $value->name ?>"><?= $actual_janmar ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_janmar ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_aprjun = App\Http\Controllers\HomeController::getaprjunactualexp($value->name);
+                                             if($actual_aprjun!= 0){ ?>
+                                                            <td><a class="actual_quarterly_expense"
+                                                                    id="04qactualexpense<?= $value->name ?>"><?= $actual_aprjun ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_aprjun ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_julsep = App\Http\Controllers\HomeController::getjulsepactualexp($value->name);
+                                             if($actual_julsep!= 0){ ?>
+                                                            <td><a class="actual_quarterly_expense"
+                                                                    id="07qactualexpense<?= $value->name ?>"><?= $actual_julsep ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_julsep ?></td>
+                                                            <?php } ?>
+                                                            <?php
+                                             $actual_octdec = App\Http\Controllers\HomeController::getoctdecactualexp($value->name);
+                                             if($actual_octdec!= 0){ ?>
+                                                            <td><a class="actual_quarterly_expense"
+                                                                    id="10qactualexpense<?= $value->name ?>"><?= $actual_octdec ?></a>
+                                                            </td>
+                                                            <?php }else{ ?>
+                                                            <td><?= $actual_octdec ?></td>
+                                                            <?php } ?>
+                                                            <td><?php echo $actual_total2 = App\Http\Controllers\HomeController::gettotalactualexp($value->name); ?></td>
+                                                            <td>
+                                                                <a
+                                                                    href="{{ url('expense_variance_quarterly_graph') }}/<?= $value->name ?>"><i
+                                                                        class="fa fa-bar-chart"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                        <?php } ?>
+                                                        <tr class="total2-tr">
+                                                            <td class="fixed-side" style=""><b>Total Expenses</b>
+                                                            </td>
+                                                            <td><?= $janmartotal2actual ?></td>
+                                                            <td><?= $aprjuntotal2actual ?></td>
+                                                            <td><?= $julseptotal2actual ?></td>
+                                                            <td><?= $octdectotal2actual ?></td>
+                                                            <td><?= $tott2 = $janmartotal2actual + $aprjuntotal2actual + $julseptotal2actual + $octdectotal2actual ?>
+                                                            </td>
+                                                            <td>
+                                                                <a href="{{ url('expense_quarterly_vary_chart') }}"><i
+                                                                        class="fa fa-bar-chart"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                    <tbody></tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td class="fixed-side" style="text-align: left;"><b>Estimated
+                                                                    Profit & Loss</b></td>
+                                                            <td><?= $janmartotalactual - $janmartotal2actual ?></td>
+                                                            <td><?= $aprjuntotalactual - $aprjuntotal2actual ?></td>
+                                                            <td><?= $julseptotalactual - $julseptotal2actual ?></td>
+                                                            <td><?= $octdectotalactual - $octdectotal2actual ?></td>
+                                                            <td><?= $monthtotalactual - $tott2 ?></td>
+                                                            <td>
+                                                                <!-- <a href="#"><i class="fa fa-bar-chart"></i></a> -->
+                                                            </td>
+                                                        </tr>
+                                                        <!-- .nk-tb-item  -->
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12" style="margin-top: 10px;">
+                                            <div id="monthly_details2"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <div class="col-md-12">
+                      <div style="border: 1px solid #da291c !important; border-radius: 10px; padding: 20px;margin-bottom: 10px;">
+                          <h4>Weekly Report</h4>
+                          <table class="table table-striped table-bordered table-hover" id="datatable_sample">
+                              <thead>
+                                  <?php if($weekcnt == 4){ ?>
+                                      <tr>
+                                          <th>1st Week</th>
+                                          <th>2nd Week</th>
+                                          <th>3rd Week</th>
+                                      </tr>
+                                  <?php }elseif ($weekcnt == 5) { ?>
+                                      <tr>
+                                          <th>1st Week</th>
+                                          <th>2nd Week</th>
+                                          <th>3rd Week</th>
+                                          <th>4th Week</th>
+                                      </tr>
+                                  <?php }elseif ($weekcnt == 6) { ?>
+                                      <tr>
+                                          <th>1st Week</th>
+                                          <th>2nd Week</th>
+                                          <th>3rd Week</th>
+                                          <th>4th Week</th>
+                                          <th>5th Week</th>
+                                      </tr>
+                                  <?php } ?>
+                              </thead>
+                              <tbody>
+                                  <?php if($weekcnt == 4){ ?>
+                                      <tr>
+                                          <td><?= $week1 ?></td>
+                                          <td><?= $week2 ?></td>
+                                          <td><?= $week3 ?></td>
+                                      </tr>
+                                  <?php }elseif ($weekcnt == 5) { ?>
+                                      <tr>
+                                          <td><?= $week1 ?></td>
+                                          <td><?= $week2 ?></td>
+                                          <td><?= $week3 ?></td>
+                                          <td><?= $week4 ?></td>
+                                      </tr>
+                                  <?php }elseif ($weekcnt == 6) { ?>
+                                      <tr>
+                                          <td><?= $week1 ?></td>
+                                          <td><?= $week2 ?></td>
+                                          <td><?= $week3 ?></td>
+                                          <td><?= $week4 ?></td>
+                                          <td><?= $week5 ?></td>
+                                      </tr>
+                                  <?php } ?>
+                              </tbody>
+                          </table>
+                      </div>
+                      <div style="border: 1px solid #da291c !important; border-radius: 10px; padding: 20px;margin-bottom: 10px;">
+                          <h4>Monthly Report</h4>
+                          <table class="table table-striped table-bordered table-hover report-table" id="report-table">
+                                  <thead>
+                                      <tr>
+                                          <th></th>
+                                          <th>Jan</th>
+                                          <th>Feb</th>
+                                          <th>Mar</th>
+                                          <th>Apr</th>
+                                          <th>May</th>
+                                          <th>Jun</th>
+                                          <th>Jul</th>
+                                          <th>Aug</th>
+                                          <th>Sep</th>
+                                          <th>Oct</th>
+                                          <th>Nov</th>
+                                          <th>Dec</th>
+                                          <th>Total</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      <tr class="total-tr">
+                                          <td><b>Total Revenue</b></td>
+                                          <td id="jantotal"><?= $jantotal ?></td>
+                                          <td id="febtotal"><?= $febtotal ?></td>
+                                          <td id="martotal"><?= $martotal ?></td>
+                                          <td id="aprtotal"><?= $aprtotal ?></td>
+                                          <td id="maytotal"><?= $maytotal ?></td>
+                                          <td id="juntotal"><?= $juntotal ?></td>
+                                          <td id="jultotal"><?= $jultotal ?></td>
+                                          <td id="augtotal"><?= $augtotal ?></td>
+                                          <td id="septotal"><?= $septotal ?></td>
+                                          <td id="octtotal"><?= $octtotal ?></td>
+                                          <td id="novtotal"><?= $novtotal ?></td>
+                                          <td id="dectotal"><?= $dectotal ?></td>
+                                          <td class="total-td"><?= $monthtotal ?></td>
+                                          
+                                              
+                                      </tr>
+                                      
+                                      <tr class="total-tr">
+                                          <td><b>Total Expenses</b></td>
+                                          <td id="jantotall"><?= $jantotall ?></td>
+                                          <td id="febtotall"><?= $febtotall ?></td>
+                                          <td id="martotall"><?= $martotall ?></td>
+                                          <td id="aprtotall"><?= $aprtotall ?></td>
+                                          <td id="maytotall"><?= $maytotall ?></td>
+                                          <td id="juntotall"><?= $juntotall ?></td>
+                                          <td id="jultotall"><?= $jultotall ?></td>
+                                          <td id="augtotall"><?= $augtotall ?></td>
+                                          <td id="septotall"><?= $septotall ?></td>
+                                          <td id="octtotall"><?= $octtotall ?></td>
+                                          <td id="novtotall"><?= $novtotall ?></td>
+                                          <td id="dectotall"><?= $dectotall ?></td>
+                                          <td class="total-td"><?= $monthtotall ?></td>
+                                          
+                                      </tr>
+                                  </tbody>
+                                  <tfoot>
+                                      <tr>
+                                          <td><b>Estimated Profit / Loss</b></td>
+                                          <td><?= $jantotal - $jantotall ?></td>
+                                          <td><?= $febtotal - $febtotall ?></td>
+                                          <td><?= $martotal - $martotall ?></td>
+                                          <td><?= $aprtotal - $aprtotall ?></td>
+                                          <td><?= $maytotal - $maytotall ?></td>
+                                          <td><?= $juntotal - $juntotall ?></td>
+                                          <td><?= $jultotal - $jultotall ?></td>
+                                          <td><?= $augtotal - $augtotall ?></td>
+                                          <td><?= $septotal - $septotall ?></td>
+                                          <td><?= $octtotal - $octtotall ?></td>
+                                          <td><?= $novtotal - $novtotall ?></td>
+                                          <td><?= $dectotal - $dectotall ?></td>
+                                          <td><?= $monthtotal - $monthtotall ?></td>
+                                      </tr>
+                                      
+                                  </tfoot>
+                              </table>
+                      </div>
+                      <div style="border: 1px solid #da291c !important; border-radius: 10px; padding: 20px; margin-bottom: 10px">
+                          <h4>Quarterly Report</h4>
+                          <table class="table table-striped table-bordered table-hover report-table">
+                                  <thead>
+                                      <tr>
+                                          <th></th>
+                                          <th>Jan - Mar</th>
+                                          <th>Apr - Jun</th>
+                                          <th>Jul - Sep</th>
+                                          <th>Oct - Dec</th>
+                                          <th>Total</th>
+                                          <th>Graph</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      <tr class="total-tr">
+                                          <td><b>Total Revenue</b></td>
+                                          <td id="janmartotal"><?= $janmartotal ?></td>
+                                          <td id="aprjuntotal"><?= $aprjuntotal ?></td>
+                                          <td id="julseptotal"><?= $julseptotal ?></td>
+                                          <td id="octdectotal"><?= $octdectotal ?></td>
+                                          <td class="total-td"><?= $quaterlytotal ?></td>
+                                      </tr>
+                                      <tr class="total-tr">
+                                          <td><b>Total Expenses</b></td>
+                                          <td id="janmartotall"><?= $janmartotall ?></td>
+                                          <td id="aprjuntotall"><?= $aprjuntotall ?></td>
+                                          <td id="julseptotall"><?= $julseptotall ?></td>
+                                          <td id="octdectotall"><?= $octdectotall ?></td>
+                                          <td class="total-td"><?= $quaterlytotall ?></td>
+                                      </tr>
+                                  </tbody>
+                                  <tfoot>
+                                      <tr>
+                                          <td><b>Estimated Profit / Loss</b></td>
+                                          <td><?= $janmartotal - $janmartotall ?></td>
+                                          <td><?= $aprjuntotal - $aprjuntotall ?></td>
+                                          <td><?= $julseptotal - $julseptotall ?></td>
+                                          <td><?= $octdectotal - $octdectotall ?></td>
+                                          <td><?= $quaterlytotal - $quaterlytotall ?></td>
+                                      </tr>
+                                      
+                                  </tfoot>
+                              </table>
+                      </div>
+                      <ul class="nav nav-tabs nav-button-tabs nav-justified">
+                          <li class="active"><a href="#tab1" data-toggle="tab">Monthly</a></li>
+                          <li><a href="#tab2" data-toggle="tab">Quarterly</a></li>
+                      </ul>
+                      
+                      <div class="tab-content margin-top-10" style="border: 1px solid #da291c !important; border-radius: 10px; padding: 20px;">
+                          <div class="tab-pane fade in active" id="tab1">
+                              <table class="table table-striped table-bordered table-hover report-table" id="report-table">
+                                  <thead>
+                                      <tr>
+                                          <th></th>
+                                          <th>Jan</th>
+                                          <th>Feb</th>
+                                          <th>Mar</th>
+                                          <th>Apr</th>
+                                          <th>May</th>
+                                          <th>Jun</th>
+                                          <th>Jul</th>
+                                          <th>Aug</th>
+                                          <th>Sep</th>
+                                          <th>Oct</th>
+                                          <th>Nov</th>
+                                          <th>Dec</th>
+                                          <th>Total</th>
+                                          <th>Graph</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      <tr>
+                                          <td colspan="15" style="text-align: left; color: #da291c;"><b>Revenue</b></td>
+                                      </tr>
+                                      <tr>
+                                          <td><b>Gross Revenue</b></td>
+                                          <td id="alljantotal"><?= $alljantotal ?></td>
+                                          <td id="allfebtotal"><?= $allfebtotal ?></td>
+                                          <td id="allmartotal"><?= $allmartotal ?></td>
+                                          <td id="allaprtotal"><?= $allaprtotal ?></td>
+                                          <td id="allmaytotal"><?= $allmaytotal ?></td>
+                                          <td id="alljuntotal"><?= $alljuntotal ?></td>
+                                          <td id="alljultotal"><?= $alljultotal ?></td>
+                                          <td id="allaugtotal"><?= $allaugtotal ?></td>
+                                          <td id="allseptotal"><?= $allseptotal ?></td>
+                                          <td id="allocttotal"><?= $allocttotal ?></td>
+                                          <td id="allnovtotal"><?= $allnovtotal ?></td>
+                                          <td id="alldectotal"><?= $alldectotal ?></td>
+                                          <td class="total-td"><?= $allmonthtotal ?></td>
+                                          
+                                          <td class="chart_monthly">
+                                              <a href="{{ url('all_monthly_budget_chart') }}"><div id="allbar-chart_total" style="height: 20px;  width: 70px; margin: 0 auto"></div></a>
+                                              <script type="text/javascript">
+                                                  $(function() {
+                                                      "use strict";
+
+
+                                                      var bar = new Morris.Bar({
+                                                          element: 'allbar-chart_total',
+                                                          resize: true,
+                                                          data: [{
+                                                                  y: '',
+                                                                  a: <?= $alljantotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $allfebtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $allmartotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $allaprtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $allmaytotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $alljuntotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $alljultotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $allaugtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $allseptotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $allocttotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $allnovtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $alldectotal ?>
+                                                              }
+                                                          ],
+                                                          barColors: ['#da291c'],
+                                                          xkey: 'y',
+                                                          ykeys: ['a'],
+                                                          labels: ['', ''],
+                                                          hideHover: 'auto',
+                                                          padding: 1,
+                                                      });
+                                                  });
+                                              </script>
+                                          </td>
+                      
+                                      </tr>
+                                      <tr>
+                                          <td><b>Other Revenue</b></td>
+                                          <td id="otherjantotal"><?= $otherjantotal ?></td>
+                                          <td id="otherfebtotal"><?= $otherfebtotal ?></td>
+                                          <td id="othermartotal"><?= $othermartotal ?></td>
+                                          <td id="otheraprtotal"><?= $otheraprtotal ?></td>
+                                          <td id="othermaytotal"><?= $othermaytotal ?></td>
+                                          <td id="otherjuntotal"><?= $otherjuntotal ?></td>
+                                          <td id="otherjultotal"><?= $otherjultotal ?></td>
+                                          <td id="otheraugtotal"><?= $otheraugtotal ?></td>
+                                          <td id="otherseptotal"><?= $otherseptotal ?></td>
+                                          <td id="otherocttotal"><?= $otherocttotal ?></td>
+                                          <td id="othernovtotal"><?= $othernovtotal ?></td>
+                                          <td id="otherdectotal"><?= $otherdectotal ?></td>
+                                          <td class="total-td"><?= $othermonthtotal ?></td>
+                                          
+                                          <td class="chart_monthly">
+                                              <a href="{{ url('other_monthly_budget_chart') }}"><div id="otherbar-chart_total" style="height: 20px;  width: 70px; margin: 0 auto"></div></a>
+                                              <script type="text/javascript">
+                                                  $(function() {
+                                                      "use strict";
+
+
+                                                      var bar = new Morris.Bar({
+                                                          element: 'otherbar-chart_total',
+                                                          resize: true,
+                                                          data: [{
+                                                                  y: '',
+                                                                  a: <?= $otherjantotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $otherfebtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $othermartotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $otheraprtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $othermaytotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $otherjuntotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $otherjultotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $otheraugtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $otherseptotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $otherocttotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $othernovtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $otherdectotal ?>
+                                                              }
+                                                          ],
+                                                          barColors: ['#da291c'],
+                                                          xkey: 'y',
+                                                          ykeys: ['a'],
+                                                          labels: ['', ''],
+                                                          hideHover: 'auto',
+                                                          padding: 1,
+                                                      });
+                                                  });
+                                              </script>
+                                          </td>
+                      
+                                      </tr>
+                                      <tr class="total-tr">
+                                          <td><b>Total Revenue</b></td>
+                                          <td id="jantotal"><?= $jantotal ?></td>
+                                          <td id="febtotal"><?= $febtotal ?></td>
+                                          <td id="martotal"><?= $martotal ?></td>
+                                          <td id="aprtotal"><?= $aprtotal ?></td>
+                                          <td id="maytotal"><?= $maytotal ?></td>
+                                          <td id="juntotal"><?= $juntotal ?></td>
+                                          <td id="jultotal"><?= $jultotal ?></td>
+                                          <td id="augtotal"><?= $augtotal ?></td>
+                                          <td id="septotal"><?= $septotal ?></td>
+                                          <td id="octtotal"><?= $octtotal ?></td>
+                                          <td id="novtotal"><?= $novtotal ?></td>
+                                          <td id="dectotal"><?= $dectotal ?></td>
+                                          <td class="total-td"><?= $monthtotal ?></td>
+                                          
+                                          <td class="chart_monthly">
+                                              <a href="{{ url('total_monthly_budget_chart') }}"><div id="bar-chart_total" style="height: 20px;  width: 70px; margin: 0 auto"></div></a>
+                                              <script type="text/javascript">
+                                                  $(function() {
+                                                      "use strict";
+
+
+                                                      var bar = new Morris.Bar({
+                                                          element: 'bar-chart_total',
+                                                          resize: true,
+                                                          data: [{
+                                                                  y: '',
+                                                                  a: <?= $jantotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $febtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $martotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $aprtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $maytotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $juntotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $jultotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $augtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $septotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $octtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $novtotal ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $dectotal ?>
+                                                              }
+                                                          ],
+                                                          barColors: ['#da291c'],
+                                                          xkey: 'y',
+                                                          ykeys: ['a'],
+                                                          labels: ['', ''],
+                                                          hideHover: 'auto',
+                                                          padding: 1,
+                                                      });
+                                                  });
+                                              </script>
+                                          </td>
+                                              
+                                      </tr>
+                                      <tr>
+                                          <td colspan="15" style="text-align: left; color: #da291c;"><b>Expenses</b></td>
+                                      </tr>
+                      
+                                      <?php
+                     foreach ($expenses as $value) {
+                     ?>
+                                              <tr>
+                                                  <td><b><?= $value->name ?></b></td>
+                                                  <td><?= $value->jan ?></td>
+                                                  <td><?= $value->feb ?></td>
+                                                  <td><?= $value->mar ?></td>
+                                                  <td><?= $value->apr ?></td>
+                                                  <td><?= $value->may ?></td>
+                                                  <td><?= $value->jun ?></td>
+                                                  <td><?= $value->jul ?></td>
+                                                  <td><?= $value->aug ?></td>
+                                                  <td><?= $value->sep ?></td>
+                                                  <td><?= $value->oct ?></td>
+                                                  <td><?= $value->nov ?></td>
+                                                  <td><?= $value->decem ?></td>
+                                                  <td class="total-td">
+                                                      <?= $value->jan + $value->feb + $value->mar + $value->apr + $value->may + $value->jun + $value->jul + $value->aug + $value->sep + $value->oct + $value->nov + $value->decem ?>
+                                                  </td>
+                                                  <td class="showgraphh" id="showgraphh<?= $value->id ?>">
+                                                      <a href="{{ url('monthly_expense_chart') }}/<?= $value->id ?>"><div id="bar-charth<?= $value->id ?>" style="height: 20px; width: 70px; margin: 0 auto"></div></a>
+                                                      <script type="text/javascript">
+                                                          $(function() {
+                                                              "use strict";
+
+
+                                                              var bar = new Morris.Bar({
+                                                                  element: 'bar-charth<?= $value->id ?>',
+                                                                  resize: true,
+                                                                  data: [{
+                                                                          y: '',
+                                                                          a: <?= $value->jan ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->feb ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->mar ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->apr ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->may ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->jun ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->jul ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->aug ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->sep ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->oct ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->nov ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->decem ?>
+                                                                      }
+                                                                  ],
+                                                                  barColors: ['#da291c'],
+                                                                  xkey: 'y',
+                                                                  ykeys: ['a'],
+                                                                  labels: ['', ''],
+                                                                  hideHover: 'auto',
+                                                                  padding: 1,
+                                                              });
+                                                          });
+                                                      </script>
+                                                  </td>
+                                              </tr>
+                                      <?php
+                     }
+                     ?>
+                                      <tr class="total-tr">
+                                          <td><b>Total Expenses</b></td>
+                                          <td id="jantotall"><?= $jantotall ?></td>
+                                          <td id="febtotall"><?= $febtotall ?></td>
+                                          <td id="martotall"><?= $martotall ?></td>
+                                          <td id="aprtotall"><?= $aprtotall ?></td>
+                                          <td id="maytotall"><?= $maytotall ?></td>
+                                          <td id="juntotall"><?= $juntotall ?></td>
+                                          <td id="jultotall"><?= $jultotall ?></td>
+                                          <td id="augtotall"><?= $augtotall ?></td>
+                                          <td id="septotall"><?= $septotall ?></td>
+                                          <td id="octtotall"><?= $octtotall ?></td>
+                                          <td id="novtotall"><?= $novtotall ?></td>
+                                          <td id="dectotall"><?= $dectotall ?></td>
+                                          <td class="total-td"><?= $monthtotall ?></td>
+                                          
+                                          <td class="chart_monthly">
+                                              <a href="{{ url('total_monthly_expense_chart') }}"><div id="bar-chart_totall" style="height: 20px;  width: 70px; margin: 0 auto"></div></a>
+                                                      <script type="text/javascript">
+                                                          $(function() {
+                                                              "use strict";
+
+
+                                                              var bar = new Morris.Bar({
+                                                                  element: 'bar-chart_totall',
+                                                                  resize: true,
+                                                                  data: [{
+                                                                          y: '',
+                                                                          a: <?= $jantotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $febtotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $martotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $aprtotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $maytotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $juntotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $jultotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $augtotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $septotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $octtotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $novtotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $dectotall ?>
+                                                                      }
+                                                                  ],
+                                                                  barColors: ['#da291c'],
+                                                                  xkey: 'y',
+                                                                  ykeys: ['a'],
+                                                                  labels: ['', ''],
+                                                                  hideHover: 'auto',
+                                                                  padding: 1,
+                                                              });
+                                                          });
+                                                      </script>
+                                          </td>
+                                              
+                                      </tr>
+                                  </tbody>
+                                  <tfoot>
+                                      <tr>
+                                          <td><b>Estimated Profit / Loss</b></td>
+                                          <td><?= $jantotal - $jantotall ?></td>
+                                          <td><?= $febtotal - $febtotall ?></td>
+                                          <td><?= $martotal - $martotall ?></td>
+                                          <td><?= $aprtotal - $aprtotall ?></td>
+                                          <td><?= $maytotal - $maytotall ?></td>
+                                          <td><?= $juntotal - $juntotall ?></td>
+                                          <td><?= $jultotal - $jultotall ?></td>
+                                          <td><?= $augtotal - $augtotall ?></td>
+                                          <td><?= $septotal - $septotall ?></td>
+                                          <td><?= $octtotal - $octtotall ?></td>
+                                          <td><?= $novtotal - $novtotall ?></td>
+                                          <td><?= $dectotal - $dectotall ?></td>
+                                          <td><?= $monthtotal - $monthtotall ?></td>
+                                          <td class="chart_monthlyy">
+                                              <a href="{{ url('monthly_profit_loss_chart') }}"><div id="bar-chart_totally" style="height: 30px;  width: 70px; margin: 0 auto"></div></a>
+                                              <script type="text/javascript">
+                                                  $(function() {
+                                                      "use strict";
+
+
+                                                      var bar = new Morris.Bar({
+                                                          element: 'bar-chart_totally',
+                                                          resize: true,
+                                                          data: [{
+                                                                  y: '',
+                                                                  a: <?= $jantotal - $jantotall ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $febtotal - $febtotall ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $martotal - $martotall ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $aprtotal - $aprtotall ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $maytotal - $maytotall ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $juntotal - $juntotall ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $jultotal - $jultotall ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $augtotal - $augtotall ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $septotal - $septotall ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $octtotal - $octtotall ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $novtotal - $novtotall ?>
+                                                              },
+                                                              {
+                                                                  y: '',
+                                                                  a: <?= $dectotal - $dectotall ?>
+                                                              }
+                                                          ],
+                                                          barColors: ['#da291c'],
+                                                          xkey: 'y',
+                                                          ykeys: ['a'],
+                                                          labels: ['', ''],
+                                                          hideHover: 'auto',
+                                                          padding: 1,
+                                                      });
+                                                  });
+                                              </script>
+                                          </td>
+                                      </tr>
+                                  </tfoot>
+                              </table>
+                          </div>
+                      
+                          <div class="tab-pane fade" id="tab2">
+                              <table class="table table-striped table-bordered table-hover report-table">
+                                  <thead>
+                                      <tr>
+                                          <th></th>
+                                          <th>Jan - Mar</th>
+                                          <th>Apr - Jun</th>
+                                          <th>Jul - Sep</th>
+                                          <th>Oct - Dec</th>
+                                          <th>Total</th>
+                                          <th>Graph</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      <tr>
+                                          <td colspan="15" style="text-align: left; color: #da291c;"><b>Revenue</b></td>
+                                      </tr>
+                                      <tr>
+                                          <td><b>Gross Revenue</b></td>
+                                          <td id="alljanmartotal"><?= $alljanmartotal ?></td>
+                                          <td id="allaprjuntotal"><?= $allaprjuntotal ?></td>
+                                          <td id="alljulseptotal"><?= $alljulseptotal ?></td>
+                                          <td id="alloctdectotal"><?= $alloctdectotal ?></td>
+                                          <td class="total-td"><?= $allquaterlytotal ?></td>
+                                          
+                                          <td class="chart_quarterly">
+                                              <a href="{{ url('all_quarterly_budget_chart') }}"><div id="allbar-chart_quarterlyy" style="height: 20px;  width: 30px; margin: 0 auto"></div></a>
+                                                      <script type="text/javascript">
+                                                          $(function() {
+                                                              "use strict";
+                                                              var bar = new Morris.Bar({
+                                                                  element: 'allbar-chart_quarterlyy',
+                                                                  resize: true,
+                                                                  data: [{
+                                                                          y: '',
+                                                                          a: <?= $alljanmartotal ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $allaprjuntotal ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $alljulseptotal ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $alloctdectotal ?>
+                                                                      }
+                                                                  ],
+                                                                  barColors: ['#da291c'],
+                                                                  xkey: 'y',
+                                                                  ykeys: ['a'],
+                                                                  labels: ['', ''],
+                                                                  hideHover: 'auto',
+                                                                  padding: 1,
+                                                              });
+                                                          });
+                                                      </script>
+                                          </td>
+                                              
+                                      </tr>
+                                      <tr>
+                                          <td><b>Other Revenue</b></td>
+                                          <td id="otherjanmartotal"><?= $otherjanmartotal ?></td>
+                                          <td id="otheraprjuntotal"><?= $otheraprjuntotal ?></td>
+                                          <td id="otherjulseptotal"><?= $otherjulseptotal ?></td>
+                                          <td id="otheroctdectotal"><?= $otheroctdectotal ?></td>
+                                          <td class="total-td"><?= $otherquaterlytotal ?></td>
+                                          
+                                          <td class="chart_quarterly">
+                                              <a href="{{ url('other_quarterly_budget_chart') }}"><div id="otherbar-chart_quarterlyy" style="height: 20px;  width: 30px; margin: 0 auto"></div></a>
+                                                      <script type="text/javascript">
+                                                          $(function() {
+                                                              "use strict";
+
+
+                                                              var bar = new Morris.Bar({
+                                                                  element: 'otherbar-chart_quarterlyy',
+                                                                  resize: true,
+                                                                  data: [{
+                                                                          y: '',
+                                                                          a: <?= $otherjanmartotal ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $otheraprjuntotal ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $otherjulseptotal ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $otheroctdectotal ?>
+                                                                      }
+                                                                  ],
+                                                                  barColors: ['#da291c'],
+                                                                  xkey: 'y',
+                                                                  ykeys: ['a'],
+                                                                  labels: ['', ''],
+                                                                  hideHover: 'auto',
+                                                                  padding: 1,
+                                                              });
+                                                          });
+                                                      </script>
+                                          </td>
+                                              
+                                      </tr>
+                                      <tr class="total-tr">
+                                          <td><b>Total Revenue</b></td>
+                                          <td id="janmartotal"><?= $janmartotal ?></td>
+                                          <td id="aprjuntotal"><?= $aprjuntotal ?></td>
+                                          <td id="julseptotal"><?= $julseptotal ?></td>
+                                          <td id="octdectotal"><?= $octdectotal ?></td>
+                                          <td class="total-td"><?= $quaterlytotal ?></td>
+                                          
+                                          <td class="chart_quarterly">
+                                              <a href="{{ url('total_quarterly_budget_chart') }}"><div id="bar-chart_quarterlyy" style="height: 20px;  width: 30px; margin: 0 auto"></div></a>
+                                                      <script type="text/javascript">
+                                                          $(function() {
+                                                              "use strict";
+
+
+                                                              var bar = new Morris.Bar({
+                                                                  element: 'bar-chart_quarterlyy',
+                                                                  resize: true,
+                                                                  data: [{
+                                                                          y: '',
+                                                                          a: <?= $janmartotal ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $aprjuntotal ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $julseptotal ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $octdectotal ?>
+                                                                      }
+                                                                  ],
+                                                                  barColors: ['#da291c'],
+                                                                  xkey: 'y',
+                                                                  ykeys: ['a'],
+                                                                  labels: ['', ''],
+                                                                  hideHover: 'auto',
+                                                                  padding: 1,
+                                                              });
+                                                          });
+                                                      </script>
+                                          </td>
+                                              
+                                      </tr>
+                                      
+                                      <tr>
+                                          <td colspan="15" style="text-align: left; color: #da291c;"><b>Expenses</b></td>
+                                      </tr>
+                                      <?php
+                     foreach ($expenses_quaterly as $value) {
+                     ?>
+                                              <tr>
+                                                  <td><b><?= $value->name ?></b></td>
+                                                  <td><?= $value->janmar ?></td>
+                                                  <td><?= $value->aprjun ?></td>
+                                                  <td><?= $value->julsep ?></td>
+                                                  <td><?= $value->octdec ?></td>
+                                                  <td class="total-td">
+                                                      <?= $value->janmar + $value->aprjun + $value->julsep + $value->octdec ?>
+                                                  </td>
+                                                  <td class="showgraphqqq" id="showgraphqqq<?= $value->id ?>">
+                                                      <a href="{{ url('quarterly_expense_chart') }}/<?= $value->id ?>"><div id="bar-chartqqq<?= $value->id ?>" style="height: 20px; width: 30px; margin: 0 auto"></div></a>
+                                                      <script type="text/javascript">
+                                                          $(function() {
+                                                              "use strict";
+
+
+                                                              var bar = new Morris.Bar({
+                                                                  element: 'bar-chartqqq<?= $value->id ?>',
+                                                                  resize: true,
+                                                                  data: [{
+                                                                          y: '',
+                                                                          a: <?= $value->janmar ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->aprjun ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->julsep ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $value->octdec ?>
+                                                                      }
+                                                                  ],
+                                                                  barColors: ['#da291c'],
+                                                                  xkey: 'y',
+                                                                  ykeys: ['a'],
+                                                                  labels: ['', ''],
+                                                                  hideHover: 'auto',
+                                                                  padding: 1,
+                                                              });
+                                                          });
+                                                      </script>
+                                                  </td>
+                                              </tr>
+                                      <?php
+                     }
+                     ?>
+                                      <tr class="total-tr">
+                                          <td><b>Total Expenses</b></td>
+                                          <td id="janmartotall"><?= $janmartotall ?></td>
+                                          <td id="aprjuntotall"><?= $aprjuntotall ?></td>
+                                          <td id="julseptotall"><?= $julseptotall ?></td>
+                                          <td id="octdectotall"><?= $octdectotall ?></td>
+                                          <td class="total-td"><?= $quaterlytotall ?></td>
+                                          
+                                          <td class="chart_quarterly">
+                                              <a href="{{ url('total_quarterly_expense_chart') }}"><div id="bar-chart_quarterllyy" style="height: 20px;  width: 30px; margin: 0 auto"></div></a>
+                                                      <script type="text/javascript">
+                                                          $(function() {
+                                                              "use strict";
+
+
+                                                              var bar = new Morris.Bar({
+                                                                  element: 'bar-chart_quarterllyy',
+                                                                  resize: true,
+                                                                  data: [{
+                                                                          y: '',
+                                                                          a: <?= $janmartotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $aprjuntotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $julseptotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $octdectotall ?>
+                                                                      }
+                                                                  ],
+                                                                  barColors: ['#da291c'],
+                                                                  xkey: 'y',
+                                                                  ykeys: ['a'],
+                                                                  labels: ['', ''],
+                                                                  hideHover: 'auto',
+                                                                  padding: 1,
+                                                              });
+                                                          });
+                                                      </script>
+                                          </td>
+                                              
+                                      </tr>
+                                  </tbody>
+                                  <tfoot>
+                                      <tr>
+                                          <td><b>Estimated Profit / Loss</b></td>
+                                          <td><?= $janmartotal - $janmartotall ?></td>
+                                          <td><?= $aprjuntotal - $aprjuntotall ?></td>
+                                          <td><?= $julseptotal - $julseptotall ?></td>
+                                          <td><?= $octdectotal - $octdectotall ?></td>
+                                          <td><?= $quaterlytotal - $quaterlytotall ?></td>
+                                          <td class="chart_quarterly">
+                                              <a href="{{ url('quarterly_profit_loss_chart') }}"><div id="bar-chart_quarterllyyy" style="height: 20px;  width: 30px; margin: 0 auto"></div></a>
+                                                      <script type="text/javascript">
+                                                          $(function() {
+                                                              "use strict";
+
+
+                                                              var bar = new Morris.Bar({
+                                                                  element: 'bar-chart_quarterllyyy',
+                                                                  resize: true,
+                                                                  data: [{
+                                                                          y: '',
+                                                                          a: <?= $janmartotal - $janmartotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $aprjuntotal - $aprjuntotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $julseptotal - $julseptotall ?>
+                                                                      },
+                                                                      {
+                                                                          y: '',
+                                                                          a: <?= $octdectotal - $octdectotall ?>
+                                                                      }
+                                                                  ],
+                                                                  barColors: ['#da291c'],
+                                                                  xkey: 'y',
+                                                                  ykeys: ['a'],
+                                                                  labels: ['', ''],
+                                                                  hideHover: 'auto',
+                                                                  padding: 1,
+                                                              });
+                                                          });
+                                                      </script>
+                                          </td>
+                                      </tr>
+                                      
+                                  </tfoot>
+                              </table>
+                          </div>
+                      </div>
+                      </div> -->
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php if($weekcnt == 3){ ?>
+    <input type="hidden" name="" value="{{ $startdates[0] }}" id="startdates0">
+    <input type="hidden" name="" value="{{ $startdates[1] }}" id="startdates1">
+    <input type="hidden" name="" value="{{ $startdates[2] }}" id="startdates2">
+    <input type="hidden" name="" value="{{ $enddates[0] }}" id="enddates0">
+    <input type="hidden" name="" value="{{ $enddates[1] }}" id="enddates1">
+    <input type="hidden" name="" value="{{ $enddates[2] }}" id="enddates2">
+    <?php }elseif ($weekcnt == 4) { ?>
+    <input type="hidden" name="" value="{{ $startdates[0] }}" id="startdates0">
+    <input type="hidden" name="" value="{{ $startdates[1] }}" id="startdates1">
+    <input type="hidden" name="" value="{{ $startdates[2] }}" id="startdates2">
+    <input type="hidden" name="" value="{{ $startdates[3] }}" id="startdates3">
+    <input type="hidden" name="" value="{{ $enddates[0] }}" id="enddates0">
+    <input type="hidden" name="" value="{{ $enddates[1] }}" id="enddates1">
+    <input type="hidden" name="" value="{{ $enddates[2] }}" id="enddates2">
+    <input type="hidden" name="" value="{{ $enddates[3] }}" id="enddates3">
+    <?php }elseif ($weekcnt == 5) { ?>
+    <input type="hidden" name="" value="{{ $startdates[0] }}" id="startdates0">
+    <input type="hidden" name="" value="{{ $startdates[1] }}" id="startdates1">
+    <input type="hidden" name="" value="{{ $startdates[2] }}" id="startdates2">
+    <input type="hidden" name="" value="{{ $startdates[3] }}" id="startdates3">
+    <input type="hidden" name="" value="{{ $startdates[4] }}" id="startdates4">
+    <input type="hidden" name="" value="{{ $enddates[0] }}" id="enddates0">
+    <input type="hidden" name="" value="{{ $enddates[1] }}" id="enddates1">
+    <input type="hidden" name="" value="{{ $enddates[2] }}" id="enddates2">
+    <input type="hidden" name="" value="{{ $enddates[3] }}" id="enddates3">
+    <input type="hidden" name="" value="{{ $enddates[4] }}" id="enddates4">
+    <?php } ?>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            // alert("hi");
+            setTimeout(function() {
+                table_data_check();
+            }, 1000);
+        });
+
+        function table_data_check() {
+            $("table tbody td").each(function() {
+                if (!$(this).hasClass("fixed-side")) {
+                    var val = $(this).html();
+                    if (val != 0) {
+                        $(this).css('color', '#da291c');
+                    }
+                }
+            });
+            $("table tbody td.grossweek").each(function() {
+                var val = $(this).html();
+                if (val != 0) {
+                    $(this).css('cursor', 'pointer');
+                }
+            });
+            $("table tbody td.otherrweek").each(function() {
+                var val = $(this).html();
+                if (val != 0) {
+                    $(this).css('cursor', 'pointer');
+                }
+            });
+        }
+        $(document).on("click", ".month_revenue", function() {
+            var idd = $(this).attr('id');
+            var id = idd.split('revbudgt');
+            var month = id[0];
+            // alert(month);
+            var url = "<?php echo url('/'); ?>/revenue_budget_details";
+
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    $("#loading").show();
+                    $("#wrapper").hide();
+                },
+                data: 'month=' + month + '&_token={{ csrf_token() }}',
+                type: "POST",
+                success: function(response) {
+                    // alert(response);
+                    $("#monthly_details").html(response);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                    $("#wrapper").show();
+                }
+            });
+        });
+        $(document).on("click", ".actual_month_revenue", function() {
+            var idd = $(this).attr('id');
+            var id = idd.split('revactual');
+            var month = id[0];
+            // alert(month);
+            var url = "<?php echo url('/'); ?>/revenue_actual_details";
+
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    $("#loading").show();
+                    $("#wrapper").hide();
+                },
+                data: 'month=' + month + '&_token={{ csrf_token() }}',
+                type: "POST",
+                success: function(response) {
+                    // alert(response);
+                    $("#monthly_details").html(response);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                    $("#wrapper").show();
+                }
+            });
+        });
+
+        $(document).on("click", ".other_revenue", function() {
+            var idd = $(this).attr('id');
+            var id = idd.split('otherbudgt');
+            var month = id[0];
+            // alert(month);
+            var url = "<?php echo url('/'); ?>/other_revenue_monthly_details";
+
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    $("#loading").show();
+                    $("#wrapper").hide();
+                },
+                data: 'month=' + month + '&_token={{ csrf_token() }}',
+                type: "POST",
+                success: function(response) {
+                    // alert(response);
+                    $("#monthly_details").html(response);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                    $("#wrapper").show();
+                }
+            });
+        });
+        $(document).on("click", ".actual_other_revenue", function() {
+            var idd = $(this).attr('id');
+            var id = idd.split('otheractual');
+            var month = id[0];
+            // alert(month);
+            var url = "<?php echo url('/'); ?>/other_revenue_actual_details";
+
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    $("#loading").show();
+                    $("#wrapper").hide();
+                },
+                data: 'month=' + month + '&_token={{ csrf_token() }}',
+                type: "POST",
+                success: function(response) {
+                    // alert(response);
+                    $("#monthly_details").html(response);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                    $("#wrapper").show();
+                }
+            });
+        });
+        $(document).on("click", ".monthly_expense", function() {
+            var idd = $(this).attr('id');
+            var id = idd.split('expense');
+            var month = id[0];
+            var name = id[1];
+            // alert(month);
+            var url = "<?php echo url('/'); ?>/monthly_expense_details";
+
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    $("#loading").show();
+                    $("#wrapper").hide();
+                },
+                data: 'month=' + month + '&name=' + name + '&_token={{ csrf_token() }}',
+                type: "POST",
+                success: function(response) {
+                    // alert(response);
+                    $("#monthly_details").html(response);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                    $("#wrapper").show();
+                }
+            });
+        });
+        $(document).on("click", ".actual_monthly_expense", function() {
+            var idd = $(this).attr('id');
+            var id = idd.split('actualexpense');
+            var month = id[0];
+            var name = id[1];
+            // alert(month);
+            var url = "<?php echo url('/'); ?>/expense_actual_details";
+
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    $("#loading").show();
+                    $("#wrapper").hide();
+                },
+                data: 'month=' + month + '&name=' + name + '&_token={{ csrf_token() }}',
+                type: "POST",
+                success: function(response) {
+                    // alert(response);
+                    $("#monthly_details").html(response);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                    $("#wrapper").show();
+                }
+            });
+        });
+        $(document).on("click", ".quarter_revenue", function() {
+            var idd = $(this).attr('id');
+            var id = idd.split('qrevbudgt');
+            var month = id[0];
+            // alert(month);
+            var url = "<?php echo url('/'); ?>/quarterrevenue_budget_details";
+
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    $("#loading").show();
+                    $("#wrapper").hide();
+                },
+                data: 'month=' + month + '&_token={{ csrf_token() }}',
+                type: "POST",
+                success: function(response) {
+                    // alert(response);
+                    $("#monthly_details2").html(response);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                    $("#wrapper").show();
+                }
+            });
+        });
+        $(document).on("click", ".actual_quarter_revenue", function() {
+            var idd = $(this).attr('id');
+            var id = idd.split('qrevactual');
+            var month = id[0];
+            // alert(month);
+            var url = "<?php echo url('/'); ?>/quarterrevenue_actual_details";
+
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    $("#loading").show();
+                    $("#wrapper").hide();
+                },
+                data: 'month=' + month + '&_token={{ csrf_token() }}',
+                type: "POST",
+                success: function(response) {
+                    // alert(response);
+                    $("#monthly_details2").html(response);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                    $("#wrapper").show();
+                }
+            });
+        });
+
+        $(document).on("click", ".quarterother_revenue", function() {
+            var idd = $(this).attr('id');
+            var id = idd.split('qotherbudgt');
+            var month = id[0];
+            // alert(month);
+            var url = "<?php echo url('/'); ?>/other_revenue_quarterly_details";
+
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    $("#loading").show();
+                    $("#wrapper").hide();
+                },
+                data: 'month=' + month + '&_token={{ csrf_token() }}',
+                type: "POST",
+                success: function(response) {
+                    // alert(response);
+                    $("#monthly_details2").html(response);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                    $("#wrapper").show();
+                }
+            });
+        });
+        $(document).on("click", ".quarteractual_other_revenue", function() {
+            var idd = $(this).attr('id');
+            var id = idd.split('qotheractual');
+            var month = id[0];
+            // alert(month);
+            var url = "<?php echo url('/'); ?>/quarterother_revenue_actual_details";
+
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    $("#loading").show();
+                    $("#wrapper").hide();
+                },
+                data: 'month=' + month + '&_token={{ csrf_token() }}',
+                type: "POST",
+                success: function(response) {
+                    // alert(response);
+                    $("#monthly_details2").html(response);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                    $("#wrapper").show();
+                }
+            });
+        });
+        $(document).on("click", ".quarterly_expense", function() {
+            var idd = $(this).attr('id');
+            var id = idd.split('qexpense');
+            var month = id[0];
+            var name = id[1];
+            // alert(month);
+            var url = "<?php echo url('/'); ?>/quarterly_expense_details";
+
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    $("#loading").show();
+                    $("#wrapper").hide();
+                },
+                data: 'month=' + month + '&name=' + name + '&_token={{ csrf_token() }}',
+                type: "POST",
+                success: function(response) {
+                    // alert(response);
+                    $("#monthly_details2").html(response);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                    $("#wrapper").show();
+                }
+            });
+        });
+        $(document).on("click", ".actual_quarterly_expense", function() {
+            var idd = $(this).attr('id');
+            var id = idd.split('qactualexpense');
+            var month = id[0];
+            var name = id[1];
+            // alert(month);
+            var url = "<?php echo url('/'); ?>/quarterexpense_actual_details";
+
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    $("#loading").show();
+                    $("#wrapper").hide();
+                },
+                data: 'month=' + month + '&name=' + name + '&_token={{ csrf_token() }}',
+                type: "POST",
+                success: function(response) {
+                    // alert(response);
+                    $("#monthly_details2").html(response);
+                },
+                complete: function() {
+                    $("#loading").hide();
+                    $("#wrapper").show();
+                }
+            });
+        });
+        $(".grossweek").click(function() {
+            $("#monthly_details3").html("");
+            if ($(this).html() != 0) {
+                var val = $(this).attr("id");
+                var vall = val.split("gweek");
+                var weekc = vall[1];
+                var startday = $("#startdates" + weekc).val();
+                var endday = $("#enddates" + weekc).val();
+
+                var url = "<?php echo url('/'); ?>/grossweekdetails";
+
+                $.ajax({
+                    url: url,
+                    beforeSend: function() {
+                        $("#loading").show();
+                        $("#wrapper").hide();
+                    },
+                    data: 'startday=' + startday + '&endday=' + endday + '&_token={{ csrf_token() }}',
+                    type: "POST",
+                    success: function(response) {
+                        // alert(response);
+                        $("#monthly_details3").html(response);
+                    },
+                    complete: function() {
+                        $("#loading").hide();
+                        $("#wrapper").show();
+                    }
+                });
+            }
+        });
+        $(".otherrweek").click(function() {
+            $("#monthly_details3").html("");
+            if ($(this).html() != 0) {
+                var val = $(this).attr("id");
+                var vall = val.split("oweek");
+                var weekc = vall[1];
+                var startday = $("#startdates" + weekc).val();
+                var endday = $("#enddates" + weekc).val();
+
+                var url = "<?php echo url('/'); ?>/otherrweekdetails";
+
+                $.ajax({
+                    url: url,
+                    beforeSend: function() {
+                        $("#loading").show();
+                        $("#wrapper").hide();
+                    },
+                    data: 'startday=' + startday + '&endday=' + endday + '&_token={{ csrf_token() }}',
+                    type: "POST",
+                    success: function(response) {
+                        // alert(response);
+                        $("#monthly_details3").html(response);
+                    },
+                    complete: function() {
+                        $("#loading").hide();
+                        $("#wrapper").show();
+                    }
+                });
+            }
+        });
+        $(".expenseweek").click(function() {
+            $("#monthly_details3").html("");
+            if ($(this).html() != 0) {
+                var val = $(this).attr("id");
+                var vall = val.split("eweek");
+                var name = vall[0];
+                var weekc = vall[1];
+                var startday = $("#startdates" + weekc).val();
+                var endday = $("#enddates" + weekc).val();
+
+                var url = "<?php echo url('/'); ?>/expenseweekdetails";
+
+                $.ajax({
+                    url: url,
+                    beforeSend: function() {
+                        $("#loading").show();
+                        $("#wrapper").hide();
+                    },
+                    data: 'startday=' + startday + '&endday=' + endday + '&name=' + name +
+                        '&_token={{ csrf_token() }}',
+                    type: "POST",
+                    success: function(response) {
+                        // alert(response);
+                        $("#monthly_details3").html(response);
+                    },
+                    complete: function() {
+                        $("#loading").hide();
+                        $("#wrapper").show();
+                    }
+                });
+            }
+        });
+    </script>
+    <script>
+        $(document).on("click", "#weeklyyearlist", function() {
+            var year = $(this).data('id');
+            $.ajax({
+                url: "<?php echo url('/'); ?>/profit_loss_stmt_weekly",
+                data: 'year=' + year,
+                type: "GET",
+                success: function(data) {
+                    $('#weeklydata').html(data);
+                    $('.fw1').hide();
+                }
+            });
+        })
+    </script>
+    <script>
+        $(document).on("click", "#monthlyyearlist", function() {
+            var year = $(this).data('id');
+            $.ajax({
+                url: "<?php echo url('/'); ?>/profit_loss_stmt_monthly",
+                data: 'year=' + year,
+                type: "GET",
+                success: function(data) {
+                    $('#monthlydata').html(data);
+                    $('.fw2').hide();
+                }
+            });
+        })
+    </script>
+    <script>
+        $(document).on("click", "#quaterlyyearlist", function() {
+            var year = $(this).data('id');
+            $.ajax({
+                url: "<?php echo url('/'); ?>/profit_loss_stmt_quaterly",
+                data: 'year=' + year,
+                type: "GET",
+                success: function(data) {
+                    $('#quaterlydata').html(data);
+                    $('.fw3').hide();
+                }
+            });
+        })
+    </script>
+@endsection

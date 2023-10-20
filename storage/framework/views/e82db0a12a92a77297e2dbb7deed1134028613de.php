@@ -1,0 +1,161 @@
+ 
+<?php $__env->startSection('content'); ?>
+<div class="nk-content ">
+	<div class="container-fluid">
+		<div class="nk-content-inner">
+			<div class="nk-content-body">
+				<div class="nk-block-head-content" style="margin-bottom:20px;">
+					<h3 class="nk-block-title page-title">Business Categories</h3>
+					
+				</div><!-- .nk-block-head-content -->
+				<div class="nk-block">
+					<div class="card card-bordered card-stretch">
+                        <div class="card-aside-wrap">
+							<div class="card-inner card-inner-lg">
+								<?php if(permission_access('business_add')==1): ?>
+								<form id="" action="<?php echo e(url('business_category_entry')); ?>" method="POST" enctype="multipart/form-data">	
+								<?php echo csrf_field(); ?>
+									<div class="row gy-4">
+										<div class="col-md-6">
+											<div class="form-group">
+												<label class="form-label">Business Category</label>
+												<input type="text" class="form-control" placeholder="Category Name" name="category" required>
+												<?php if($errors->any()): ?>
+													<p style="color: red"><?php echo e($errors->first()); ?></p>
+												<?php endif; ?>
+											</div>
+										</div>
+										
+										
+										<div class="col-12">
+											<input type="submit" class="btn btn-sm btn-primary" value="Save">
+										</div>
+									</div>
+								</form>
+								<?php endif; ?>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="nk-block">
+					<div class="card card-bordered card-stretch">
+						<div class="card-inner-group">
+							<div class="col-md-12">
+								
+							</div>
+							<div class="card-inner">
+								<table class="datatable-init nk-tb-list nk-tb-ulist" data-auto-responsive="false">
+									<thead>
+										<tr class="nk-tb-item nk-tb-head">
+											<th class="nk-tb-col" width="20%">
+							                    <input type="checkbox" class="group-checkable"  />
+							                    <a href="javascript:void(0)" class="btn btn-sm btn-info mark-as-medical">Mark as Medical</a>
+							                </th>
+											<!-- <th class="nk-tb-col"><span class="sub-text">Id</span></th> -->
+											
+											<th class="nk-tb-col"><span class="sub-text">Category Name</span></th>
+											<th class="nk-tb-col"><span class="sub-text">Is Medical ?</span></th>
+											<th class="nk-tb-col tb-col-lg"><span class="sub-text">Action</span></th>
+											
+										</tr>
+									</thead>
+									<tbody>
+										<?php 
+											$i = 1;
+						                  	foreach ($categories as $category) {
+						                ?>
+										<tr class="nk-tb-item">
+											<td class="nk-tb-col">
+												<input type="checkbox" class="checkboxes <?php if($category->is_medical=='yes'): ?> checked  <?php endif; ?>" value="<?= $category->id;?>" <?php if($category->is_medical=='yes'): ?> checked  <?php endif; ?> />
+											</td>
+											<!-- <td class="nk-tb-col">
+												<span><?= $i ?></span>
+											</td> -->
+											
+											<td class="nk-tb-col">
+												<span><?= $category->category; ?></span>
+												
+											</td>
+												<td class="nk-tb-col text-uppercase">
+													<?= $category->is_medical; ?>
+												</td>
+											<td class="nk-tb-col tb-col-md">
+												<?php if(permission_access('business_edit')==1): ?>
+												<a href="<?php echo url('editbusiness_category') ?>/<?= $category->id ?>" class="btn btn-sm btn-primary">Edit</a>
+												<?php endif; ?>
+												<?php if(permission_access('business_delete')==1): ?>
+												<a href="<?php echo url('deletebusiness_category') ?>/<?= $category->id ?>" class="btn btn-sm btn-danger">Delete</a>
+												<?php endif; ?>
+											</td>
+											
+											
+										</tr>
+										<?php 
+											$i++;
+											} 
+										?>
+										
+									</tbody>
+								</table>
+							</div>
+						</div><!-- .card-inner-group -->
+					</div><!-- .card -->
+				</div><!-- .nk-block -->
+				
+				
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	$(document).on("click",".mark-as-medical",function(){
+        var cat_arr = []; 
+            $(".checkboxes.checked").each(function() {
+                var id = $(this).val();
+                cat_arr.push(id);
+            }); 
+         if(cat_arr == '') {
+         	alert('Please select atleast one category');
+         }else{
+         	 $elm=$(this);
+          $elm.hide();
+          $elm.after('<i class="fa fa-spinner fa-pulse fa-1x fa-fw submit-loading"></i>');  
+             $.ajax({
+                  url: "<?php echo e(url('mark-as-medical-category')); ?>",
+                  data: 'cat_arr=' + cat_arr + '&_token=<?php echo e(csrf_token()); ?>',
+                  type: "POST",
+                success: function (response) {
+                
+                   window.location.reload();
+                   $(".submit-loading").remove();
+                  $elm.show();
+                }
+            });
+         }  
+	});
+$(document).on("change", "tbody tr .checkboxes", function () {
+        if ($(this).prop('checked')) {
+            $(this).addClass("checked");
+        }
+        else{
+        	$(this).removeClass("checked");
+            $(".group-checkable").prop('checked', false);
+        }
+    });
+	  $(document).on("change", ".group-checkable", function(){
+        
+        if($(this).prop('checked')){
+            $(".checkboxes").prop("checked", false);
+            $(".checkboxes").addClass("checked");
+            $(".checkboxes").trigger('click');
+        }
+        else{
+            $(".checkboxes").prop("checked", false);
+            $(".gradeX").removeClass("active");
+            $(".checkboxes").removeClass("checked");
+           
+        }
+    });
+</script>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /home/mafamatest/public_html/resources/views/admin_business_category.blade.php ENDPATH**/ ?>

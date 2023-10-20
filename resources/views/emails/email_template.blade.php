@@ -1,0 +1,4 @@
+
+
+
+{!! $data['email_message'] !!}

@@ -1,0 +1,92 @@
+@extends('layouts.admin') 
+@section('content')
+<div class="nk-content ">
+	<div class="container-fluid">
+		<div class="nk-content-inner">
+			<div class="nk-content-body">
+				<div class="nk-block-head-content" style="margin-bottom:20px;display:flex;">
+					<h3 class="nk-block-title page-title"   style="width:900px;">Bonus Condition Table</h3>
+					<!--<a href="add_access_roles.php" class="btn btn-sm btn-primary" style="float:right;">Add New</a>-->
+				</div><!-- .nk-block-head-content -->
+				
+				<div class="nk-block">
+					<div class="card card-bordered card-stretch">
+						<div class="card-inner-group">
+							<div class="col-md-12">
+								
+							</div>
+							<div class="card-inner">
+								@if(permission_access('bonus_prize_setup_add')==1)
+								<a class="btn btn-sm btn-success pull-right" href="{{url('admin/bonus-conditions')}}">Add New Bonus Condition</a>
+								@endif
+								<div class="">
+								<table class="datatable-init nk-tb-list nk-tb-ulist" data-auto-responsive="false">
+									<thead  class="thead-light">
+										<tr  class="nk-tb-item nk-tb-head">
+											<th class="nk-tb-col"><span class="sub-text">Level / Bonus</th>
+											<th class="nk-tb-col"><span class="sub-text">Point Earned </th>
+											<th class="nk-tb-col"><span class="sub-text">Number of Times Log-in/Quarter</th>
+											<th class="nk-tb-col"><span class="sub-text">Number of Direct Downline Affiliates</th>
+											<th class="nk-tb-col"><span class="sub-text">Number of Active Users</th>
+											<th class="nk-tb-col"><span class="sub-text">Start Date</th>
+											<th class="nk-tb-col"><span class="sub-text">End Date</th>
+										<!--	<th class="nk-tb-col"><span class="sub-text">Notifications / Pic / Slide Show </th>-->
+											<th class="nk-tb-col"><span class="sub-text">Actions </th>
+										</tr>
+									</thead>
+									<tbody>
+										@if(!empty($bonus_conditions))
+										@foreach($bonus_conditions as $bonus)
+										<tr class="nk-tb-item">
+											<td class="nk-tb-col">
+												<span>Level {{$bonus->level}}</span>
+											</td>
+											<td class="nk-tb-col">
+												<span>{{$bonus->point_earned }}</span>
+											</td>
+											<td class="nk-tb-col">
+												<span>{{$bonus->active_days }}</span>
+											</td>
+											<td class="nk-tb-col">
+												<span>{{$bonus->downline_affiliate}}</span>
+											</td>
+												<td class="nk-tb-col">
+												<span>{{$bonus->active_users}}</span>
+											</td>
+												<td class="nk-tb-col">
+													<span>{{date('m-d-Y',strtotime($bonus->start_date))}}</span>
+											</td>
+												<td class="nk-tb-col">
+												<span>{{date('m-d-Y',strtotime($bonus->end_date))}}</span>
+											</td>
+										
+											<td class="nk-tb-col tb-col-md">
+												@if(permission_access('bonus_prize_setup_edit')==1)
+												<a href="{{url('admin/bonus-conditions/'.$bonus->id )}} " class="btn btn-sm btn-success">Edit</a>
+												@endif
+												<br>
+												@if(permission_access('bonus_prize_setup_delete')==1)
+												<a data-id="{{$bonus->id }}" data-list="bonus_conditions" href="javascript:void(0)" class="btn btn-sm btn-success deleterow">Delete</a>
+												@endif
+												
+											</td>
+											
+										</tr><!-- .nk-tb-item  -->
+										 @endforeach
+										@endif
+									</tbody>
+								</table>
+								</div>
+							</div>
+						</div><!-- .card-inner-group -->
+					</div><!-- .card -->
+				</div><!-- .nk-block -->
+				
+	
+				
+				
+			</div>
+		</div>
+	</div>
+</div>
+@endsection

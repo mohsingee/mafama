@@ -1,0 +1,1 @@
+<?php echo $body; ?><?php /**PATH /home/mafamatest/public_html/resources/views/main/notification_email_template.blade.php ENDPATH**/ ?>
